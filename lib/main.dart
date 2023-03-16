@@ -78,6 +78,18 @@ class _HomeState extends State<Home> {
         }
       });
     });
+
+    _startGame().then(
+      (value) => Timer.periodic(
+        const Duration(seconds: 1),
+        (timer) {
+          setState(
+            () => teamAScore += 1,
+          );
+          _updateScore();
+        },
+      ),
+    );
   }
 
   @override
@@ -141,30 +153,7 @@ class _HomeState extends State<Home> {
               if (_latestActivityId == null)
                 TextButton(
                   onPressed: () async {
-                    final activityModel = FootballGameLiveActivityModel(
-                      matchName: 'World cup ⚽️',
-                      teamAName: 'PSG',
-                      teamAState: 'Home',
-                      teamALogo:
-                          LiveActivityImageFromAsset('assets/images/psg.png'),
-                      teamBLogo: LiveActivityImageFromAsset(
-                          'assets/images/chelsea.png'),
-                      teamBName: 'Chelsea',
-                      teamBState: 'Guest',
-                      matchStartDate: DateTime.now(),
-                      matchEndDate: DateTime.now().add(
-                        const Duration(
-                          minutes: 6,
-                          seconds: 30,
-                        ),
-                      ),
-                    );
-
-                    final activityId =
-                        await _liveActivitiesPlugin.createActivity(
-                      activityModel.toMap(),
-                    );
-                    setState(() => _latestActivityId = activityId);
+                    await _startGame();
                   },
                   child: Column(
                     children: const [
@@ -228,6 +217,30 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  Future<void> _startGame() async {
+    final activityModel = FootballGameLiveActivityModel(
+      matchName: 'World cup ⚽️',
+      teamAName: 'PSG',
+      teamAState: 'Home',
+      teamALogo: LiveActivityImageFromAsset('assets/images/psg.png'),
+      teamBLogo: LiveActivityImageFromAsset('assets/images/chelsea.png'),
+      teamBName: 'Chelsea',
+      teamBState: 'Guest',
+      matchStartDate: DateTime.now(),
+      matchEndDate: DateTime.now().add(
+        const Duration(
+          minutes: 6,
+          seconds: 30,
+        ),
+      ),
+    );
+
+    final activityId = await _liveActivitiesPlugin.createActivity(
+      activityModel.toMap(),
+    );
+    setState(() => _latestActivityId = activityId);
   }
 
   Future _updateScore() {
